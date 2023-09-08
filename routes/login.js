@@ -1,12 +1,12 @@
 const express = require("express");
 // const dbconnect = require("../mongodb");
 require("../config");
+const logController=require("../controllers/logAuth")
 const router = express.Router();
-const userModel = require("../models/user");
-const jwt = require("jsonwebtoken");
+
 const app = express();
 const cors = require("cors");
-const private_key = "privatekey";
+
 const bodyParser = require("body-parser");
 
 
@@ -14,49 +14,7 @@ app.use(bodyParser.json());
 app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 
 // app.use(bodyParser.raw());
-router.post("/", (req, res) => {
-  let key;
-  const { email: reqEmail, password: reqPassword } = req.body;
-  jwt.sign(
-    { email: reqEmail, password: reqPassword },
-    private_key,
-    { expiresIn: "300s" },
-    (err, token) => {
-      key = token;
-      // console.log(key);
-    }
-  );
-   userModel.findOne({
-    email: reqEmail,
-    password: reqPassword,
-  }).then((data) => {
-        // console.log(data.password);
-        //if the email is present in the database then and password is correct
-        if (data.password == reqPassword) {
-          res.status(200).json({
-            status: "success",
-            token: key,
-            message: "Logged in successfully",
-            userdetails: data,
-          });
-        }
-        //if password is incorrect then
-        else {
-          res.status(404).json({
-            status: "error",
-            message: "Wrong password",
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(404).json({
-          status: "error",
-          message: "Wrong email address",
-        });
-      });
-  
-});
+router.post("/", logController);
 module.exports = router;
 
 
